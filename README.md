@@ -1,1 +1,1 @@
-# rp-repo
+# research-project-repo
