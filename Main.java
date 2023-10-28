@@ -1,4 +1,3 @@
-import MIDIStuff.MidiSynth;
 
 import javax.sound.midi.*;
 import javax.sound.midi.spi.MidiDeviceProvider;
@@ -18,82 +17,64 @@ public class Main {
         Receiver rec;
         Scanner sc = new Scanner(System.in);
 
+        MidiDevice device;
         try {
-//            System.out.print("Print devices? [y/n]: ");
-//            String choice = choose.nextLine();
-//            if (choice.equals("y")) {
-//                choose.nextLine();
-//            }
-
-//            MidiDevice.Info[] info =
-//                    MidiSystem.getMidiDeviceInfo();
-//            trans = getTransmitter();
-//            rec = getReceiver();
-//            MidiDevice device = MidiSystem.getMidiDevice(info[4]);
-
             // Obtain information about all the installed synthesizers.
             MidiDevice.Info[] info = MidiSystem.getMidiDeviceInfo();
             ArrayList<MidiDevice> deviceList = new ArrayList<>();
             for (int i = 0; i < info.length; i++) {
                 try {
-                    MidiSystem.getMidiDevice(info[i]).open();
-                    deviceList.add(MidiSystem.getMidiDevice(info[i]));
-                    System.out.println(MidiSystem.getMidiDevice(info[i]));
+                    device = MidiSystem.getMidiDevice(info[i]);
+                    System.out.println("device: " + MidiSystem.getMidiDevice(info[i]).getDeviceInfo());
+                    //does the device have any transmitters?
+                    System.out.println("transmitters(" + device.getTransmitters().size() + "):" + device.getTransmitter());
+                    if (device.getTransmitters().size() > 0) {
+                        //if it does, add it to the device list
+                        deviceList.add(device);
+                    } else {
+                        System.out.println("no transmitters");
+                    }
                 } catch (MidiUnavailableException e) {
                     System.out.println("no midi :(");
                 }
             }
 
-
-//            device.getTransmitter();
-//// Get the transmitter class from your input device
-//            transmitter = inputDevice.getTransmitter();
-//// Get the receiver class from your sequencer
-//            receiver = sequencer.getReceiver();
-//// Bind the transmitter to the receiver so the receiver gets input from the transmitter
-//            transmitter.setReceiver(receiver);
-//
-//// Create a new sequence
-//            Sequence seq = new Sequence(Sequence.PPQ, 24);
-//// And of course a track to record the input on
-//            Track currentTrack = seq.createTrack();
-//// Do some sequencer settings
-//            sequencer.setSequence(seq);
-//            sequencer.setTickPosition(0);
-//            sequencer.recordEnable(currentTrack, -1);
-//// And start recording
-//            sequencer.startRecording();
-
-
-//
-//            System.out.println(trans);
-//            System.out.println(rec);
-//
-//             trans.setReceiver(device.getReceiver());
-//
-//            System.out.println(trans.getReceiver());
-//
-//            trans.close();
-//            rec.close();
+                //if any transmitting devices were found
+                if(deviceList.size() > 0) {
+                    //for each device
+                    for(int i = 0; i < deviceList.size(); i++) {
+                        try {
+                            //get all transmitters
+                            List<Transmitter> transmitters = deviceList.get(i).getTransmitters();
+                            //and for each transmitter
+                            for(int j = 0; j<transmitters.size();j++) {
+                                //create a new receiver
+                                transmitters.get(i).setReceiver(
+                                        deviceList.get(i).getReceiver()
+                                );
+                            }
+                            //open each device
+                            deviceList.get(i).open();
+                            System.out.println(deviceList.get(i).getDeviceInfo()+" Was Opened");
+                        } catch (MidiUnavailableException e) {}
+                    }
+                }
         } finally {
 
         }
 
     }
 
-//    static void getInfo() throws MidiUnavailableException {
-//        MidiDevice.Info[] info =
-//                MidiSystem.getMidiDeviceInfo();
-//
-//        for (int i=0; i < info.length; i++) {
-//            System.out.println(i + ") " + info[i]);
-//            System.out.println("Name: " + info[i].getName());
-//            System.out.println("Description: " +
-//                    info[i].getDescription());
-//
-//            MidiDevice device =
-//                    MidiSystem.getMidiDevice(info[i]);
-//            System.out.println("Device: " + device);
+    //tried to write my own class. I thought the send method handles an MidiEvents sent to it
+//    public static class MidiInputReceiver implements Receiver {
+//        public String name;
+//        public MidiInputReceiver(String name) {
+//            this.name = name;
 //        }
+//        public void send(MidiMessage msg, long timeStamp) {
+//            System.out.println("midi received");
+//        }
+//        public void close() {}
 //    }
+
 }
