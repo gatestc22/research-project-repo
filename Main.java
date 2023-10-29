@@ -13,68 +13,76 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
 
+        // new code
+        MidiDevice device;
+
         Transmitter trans;
         Receiver rec;
         Scanner sc = new Scanner(System.in);
 
-        MidiDevice device;
+        Sequencer seq;
+        Synthesizer syn;
+        int numTrans;
+        int numRec;
+
         try {
-            // Obtain information about all the installed synthesizers.
-            MidiDevice.Info[] info = MidiSystem.getMidiDeviceInfo();
+
+            // obtain information about all recognizable midi devices
+            MidiDevice.Info[] infoArray = MidiSystem.getMidiDeviceInfo();
             ArrayList<MidiDevice> deviceList = new ArrayList<>();
-            for (int i = 0; i < info.length; i++) {
-                try {
-                    device = MidiSystem.getMidiDevice(info[i]);
-                    System.out.println("device: " + MidiSystem.getMidiDevice(info[i]).getDeviceInfo());
-                    //does the device have any transmitters?
-                    System.out.println("transmitters(" + device.getTransmitters().size() + "):" + device.getTransmitter());
-                    if (device.getTransmitters().size() > 0) {
-                        //if it does, add it to the device list
-                        deviceList.add(device);
-                    } else {
-                        System.out.println("no transmitters");
-                    }
-                } catch (MidiUnavailableException e) {
-                    System.out.println("no midi :(");
-                }
+            for (int i = 0; i < infoArray.length; i++) {
+                // initialize device variable with info at position i in infoArray
+                device = MidiSystem.getMidiDevice(infoArray[i]);
+                deviceList.add(device);
+                System.out.println("Device: " + device.getDeviceInfo());
             }
 
-                //if any transmitting devices were found
-                if(deviceList.size() > 0) {
-                    //for each device
-                    for(int i = 0; i < deviceList.size(); i++) {
-                        try {
-                            //get all transmitters
-                            List<Transmitter> transmitters = deviceList.get(i).getTransmitters();
-                            //and for each transmitter
-                            for(int j = 0; j<transmitters.size();j++) {
-                                //create a new receiver
-                                transmitters.get(i).setReceiver(
-                                        deviceList.get(i).getReceiver()
-                                );
-                            }
-                            //open each device
-                            deviceList.get(i).open();
-                            System.out.println(deviceList.get(i).getDeviceInfo()+" Was Opened");
-                        } catch (MidiUnavailableException e) {}
-                    }
-                }
+            // get default sequencer and synthesizer
+            seq = MidiSystem.getSequencer();
+            syn = MidiSystem.getSynthesizer();
+
+            if (seq != null) System.out.println("Seq: " + seq.getDeviceInfo());
+            numTrans = seq.getTransmitters().size();
+            numRec = seq.getReceivers().size();
+            System.out.println("Num Trans: " + numTrans);
+            System.out.println("Num Rec: " + numRec);
+
+            if (syn != null) System.out.println("Syn: " + syn.getDeviceInfo());
+            numTrans = syn.getTransmitters().size();
+            numRec = syn.getReceivers().size();
+            System.out.println("Num Trans: " + numTrans);
+            System.out.println("Num Rec: " + numRec);
+
+            for (int i = 0; i < deviceList.size(); i++) {
+                // TODO: obtain device at position i from deviceList
+                System.out.println();
+            }
+
+//
+//                //if any transmitting devices were found
+//                if(deviceList.size() > 0) {
+//                    //for each device
+//                    for(int i = 0; i < deviceList.size(); i++) {
+//                        try {
+//                            //get all transmitters
+//                            List<Transmitter> transmitters = deviceList.get(i).getTransmitters();
+//                            //and for each transmitter
+//                            for(int j = 0; j<transmitters.size();j++) {
+//                                //create a new receiver
+//                                transmitters.get(i).setReceiver(
+//                                        deviceList.get(i).getReceiver()
+//                                );
+//                            }
+//                            //open each device
+//                            deviceList.get(i).open();
+//                            System.out.println(deviceList.get(i).getDeviceInfo()+" Was Opened");
+//                        } catch (MidiUnavailableException e) {}
+//                    }
+//                }
         } finally {
 
         }
 
     }
-
-    //tried to write my own class. I thought the send method handles an MidiEvents sent to it
-//    public static class MidiInputReceiver implements Receiver {
-//        public String name;
-//        public MidiInputReceiver(String name) {
-//            this.name = name;
-//        }
-//        public void send(MidiMessage msg, long timeStamp) {
-//            System.out.println("midi received");
-//        }
-//        public void close() {}
-//    }
 
 }
