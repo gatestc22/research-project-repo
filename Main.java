@@ -2,6 +2,7 @@
 import javax.sound.midi.*;
 import javax.sound.midi.spi.MidiDeviceProvider;
 
+import java.io.File;
 import java.io.InputStream;
 import java.util.*;
 
@@ -16,6 +17,7 @@ public class Main {
         MidiDevice deviceOut = null;
         Transmitter midiIn = null;
         Receiver midiOut = null;
+        Sequencer seqr;
         Scanner sc;
         MidiDevice.Info[] infoArray = MidiSystem.getMidiDeviceInfo(); // array of all current midi device info
 
@@ -24,7 +26,7 @@ public class Main {
             deviceIn = MidiSystem.getMidiDevice(infoArray[i]);
             if (deviceIn.toString().contains("MidiInDevice")) {
                 System.out.println(deviceIn.toString());
-                deviceIn.open();
+                //deviceIn.open();
                 // print device info
                 System.out.println("~~Device Info~~");
                 System.out.println("Name: " + deviceIn.getDeviceInfo().getName());
@@ -63,29 +65,64 @@ public class Main {
         }
 
         System.out.println();
+        seqr = MidiSystem.getSequencer();
+//        Transmitter transmitter;
+//        Receiver receiver;
 
         // TODO: while loop
         while (deviceIn.isOpen() && deviceOut.isOpen()) {
 
             midiIn.setReceiver(midiOut);
             //System.out.println(midiOut);
-
-//            Sequencer seqr;
-//            seqr.addMetaEventListener(new MetaEventListener() {
-//                @Override
-//                public void meta(MetaMessage meta) {
-//                    System.out.println("Input Received!");
-//                }
-//            });
-//            seqr.addControllerEventListener(
-//                    new ControllerEventListener() {
-//                        public void controlChange(ShortMessage event) {
-//                            System.out.println(event.getData1());
-//                            System.out.println(event.getData2());
-//                        }
-//                    }
-//            )
-
+            seqr.addMetaEventListener(new MetaEventListener() {
+                @Override
+                public void meta(MetaMessage meta) {
+                    System.out.println("Input Received!");
+                }
+            });
+            seqr.addControllerEventListener(
+                    new ControllerEventListener() {
+                        public void controlChange(ShortMessage event) {
+                            System.out.println(event.getData1());
+                            System.out.println(event.getData2());
+                        }
+                    },
+                    getMidiFileTypes(seqr.getSequence())
+            );
+//
+//            // Open a connection to your input device
+//            deviceIn.open();
+//// Open a connection to the default sequencer (as specified by MidiSystem)
+//            seqr.open();
+//// Get the transmitter class from your input device
+//            transmitter = deviceIn.getTransmitter();
+//// Get the receiver class from your sequencer
+//            receiver = seqr.getReceiver();
+//// Bind the transmitter to the receiver so the receiver gets input from the transmitter
+//            transmitter.setReceiver(receiver);
+//
+//// And of course a track to record the input on
+//            Track currentTrack = seqr.getSequence().createTrack();
+//// Do some sequencer settings
+//            seqr.setSequence(seqr.getSequence());
+//            seqr.setTickPosition(0);
+//            seqr.recordEnable(currentTrack, -1);
+//// And start recording
+//            seqr.startRecording();
+//
+//            // Stop recording
+//            if(seqr.isRecording())
+//            {
+//                // Tell sequencer to stop recording
+//                //sequencer.stopRecording();
+//
+//                // Retrieve the sequence containing the stuff you played on the MIDI instrument
+//                Sequence tmp = seqr.getSequence();
+//
+//                // Save to file
+//                MidiSystem.write(tmp, 0, new File("MyMidiFile.mid"));
+//            }
+//
         }
 
         deviceIn.close();
